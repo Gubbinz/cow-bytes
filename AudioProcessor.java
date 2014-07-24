@@ -5,10 +5,15 @@ public class AudioProcessor {
 	private final int amplitudeNegative;
 	private final int topFreqs;
 	
-	private final int bandRange = 20;
+	private final int bandRange = 50;
 	private int freqMatches = 10;
 	int band = 0;
+	int index = 0;
+	
 	int count = 0;
+	
+	
+	AudioMatch audioMatch;  
 	
 	
 	public AudioProcessor() {
@@ -16,6 +21,7 @@ public class AudioProcessor {
 		this.amplitudePositive = 20;
 		this.amplitudeNegative = amplitudePositive - (amplitudePositive*2);
 		this.topFreqs = 10;
+		this. audioMatch = new AudioMatch(bufferSize, freqMatches, bandRange);
 	}
 	
 	public AudioProcessor(int ampPos) {
@@ -23,10 +29,14 @@ public class AudioProcessor {
 		this.amplitudePositive = ampPos;
 		this.amplitudeNegative = amplitudePositive - (amplitudePositive*2);
 		this.topFreqs = 10;
+		this. audioMatch = new AudioMatch(bufferSize, freqMatches, bandRange);
 	}
 	
 	
 	public void process(byte buffer[], long bufferIndex) {
+		
+		
+	
 		// array of complex numbers
 		// used to hold buffer values as complex numbers
 		Complex complexBuffer[] = new Complex[bufferSize];
@@ -64,16 +74,9 @@ public class AudioProcessor {
 			}
 			
 			findFreqs(freq);
-			
-			
-			// test
-			//System.out.println("Buffer " +bufferIndex +"'s first FFT value is " +complexBuffer[0]);
-			//System.out.println("Buffer " +bufferIndex +"'s first Freq value is " +freq[0]);
-			
-			
-			
-			
 		}
+		
+		index++;
 	}
 	
 	
@@ -166,27 +169,19 @@ public class AudioProcessor {
 			}
 		}
 		
-		
-		
-		double orderedValues[] = new double[freqMatches];
-		int orderedBands[] = new int[freqMatches];
-		int k = 0;
 		boolean flag2 = false;
-		int match = 0;
-		
-		// initialise
-		for (int i = 0; i < freqMatches; i++) {
-			orderedBands[i] = 300;
-		}
-		
+	
+		int roundBand; 
 		
 		System.out.println("The top bands were:");
 		for (int i = 0; i < freqMatches; i++) {
 			for (int j = 0; j < freqMatches; j++) {
 				
 				if (flag2 == false && topFreqs[i] > topFreqs[j]) {
-					System.out.println("Band " +topFreqsBand[i] +": " +topFreqs[i]);
+					roundBand = Math.round(topFreqsBand[i] / 20)+1;
+					System.out.println("Band " +roundBand +": " +topFreqsBand[i] +", at amp: " +topFreqs[i]);
 					flag = true;
+					
 					break;
 				}
 			}
@@ -195,35 +190,20 @@ public class AudioProcessor {
 			topFreqsBand[i] = 0;
 		}
 		
-
-		// test
-		//System.out.println("Top 10 Frequency bands and values:");
-		//for (int i = 0; i < freqMatches; i++)
-		//	System.out.println("Band " +orderedBands[i] +": " +orderedValues[i]);
 		
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	private void getFreqBand(int index) {
-		if (index < bandRange) {
-			band = 1;
+		
+		
+		
+		
+		if (count <= 3) {
+			audioMatch.addData(topFreqsBand, index);
 			count++;
 		}
-		
-		else if (count == bandRange) {
-			band++;
-			count = 0;
+		else {
+			audioMatch.testData(topFreqsBand, index);
 		}
-			
-		else
-			count++;	
+		
+
 	}
 	
 }
