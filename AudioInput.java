@@ -1,5 +1,3 @@
-// test
-
 import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.AudioSystem;
@@ -46,7 +44,7 @@ public class AudioInput {
 			capture.start();
 			
 			try {
-				Thread.currentThread().sleep(2000);
+				Thread.currentThread().sleep(15000);
 			} catch(InterruptedException ex) {
 			    Thread.currentThread().interrupt();
 			}
@@ -91,6 +89,8 @@ public class AudioInput {
 	
 	class CaptureThread extends Thread {
 		boolean running;
+		AudioProcessor audioProcessor = new AudioProcessor();
+		
 		
 		public void run() {
 				
@@ -110,6 +110,8 @@ public class AudioInput {
 			running = true;
 			bufferIndex = 1;
 			
+			
+			
 			// get a window full of data
 			try {
 				while (running) {
@@ -128,7 +130,7 @@ public class AudioInput {
 						//System.out.println("Recording now...");
 						audioStream.write(buffer, 0, count);
 						
-						AudioProcessor audioProcessor = new AudioProcessor();
+						
 						audioProcessor.process(buffer, bufferIndex);
 						
 						 }
